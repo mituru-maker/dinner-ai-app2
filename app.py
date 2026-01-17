@@ -32,21 +32,11 @@ def get_api_key():
 def initialize_gemini(api_key):
     """Gemini を初期化する関数"""
     try:
-        # APIキーのデバッグ情報
-        st.sidebar.write(f"🔑 APIキー確認: {api_key[:10]}...{api_key[-10:] if len(api_key) > 20 else '***'}")
-        
         # デフォルト設定で初期化（APIバージョン指定なし）
         genai.configure(api_key=api_key)
         
         # 利用可能なモデルを確認
         models = list(genai.list_models())  # generator を list に変換
-        
-        # 利用可能なモデルを表示
-        st.sidebar.subheader("🔍 利用可能なモデル")
-        for model in models:
-            model_name = model.name.split('/')[-1]
-            supported_methods = getattr(model, 'supported_generation_methods', [])
-            st.sidebar.text(f"• {model_name}: {supported_methods}")
         
         # generateContent をサポートするモデルを探す
         supported_models = []
@@ -54,14 +44,6 @@ def initialize_gemini(api_key):
             if hasattr(model, 'supported_generation_methods') and 'generateContent' in model.supported_generation_methods:
                 model_name = model.name.split('/')[-1]
                 supported_models.append(model_name)
-                st.sidebar.write(f"✅ サポート: {model_name}")
-        
-        # デバッグ：すべてのモデルの supported_generation_methods を表示
-        st.sidebar.subheader("🔍 デバッグ情報")
-        for model in models[:10]:  # 最初の10モデルのみ表示
-            model_name = model.name.split('/')[-1]
-            methods = getattr(model, 'supported_generation_methods', [])
-            st.sidebar.text(f"{model_name}: {methods}")
         
         if not supported_models:
             st.error("❌ generateContent をサポートするモデルが見つかりません")
